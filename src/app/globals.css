@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-app: #f1ebd9; /* Unique warm light slate/sand */
+    --bg-sidebar: #eae4d1;
+    --bg-surface: #ffffff;
+    --fg-primary: #121214;
+    --fg-secondary: #5c5c5e;
+    --accent: #de491b; /* Burnt orange / terra cotta */
+    --border: #dfd9c8;
+  }
+
+  body {
+    background-color: var(--bg-app);
+    color: var(--fg-primary);
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Syne', sans-serif;
+  }
+}
+
+.font-mono-data {
+  font-family: 'Space Mono', monospace;
+}
+
+.font-heading {
+  font-family: 'Syne', sans-serif;
+}

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build and cache files
+*.tsbuildinfo
+.firebase/
+
+# Local environment
+.env
+.env.*
+.env*.local
+!.env.example
+.agents/
+
+# Credentials and private keys
+*serviceAccount*.json
+*service-account*.json
+*credentials*.json
+*secret*.json
+*.pem
+*.p12
+*.key
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
