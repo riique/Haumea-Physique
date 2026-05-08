@@ -16,6 +16,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="pt-BR">
+            <head>
+                <meta charSet="utf-8" />
+            </head>
             <body className="antialiased font-sans text-primary bg-[#f4f2ea]">
                 <div className="flex h-[100dvh] w-full overflow-hidden">
                     <LayoutWrapper>

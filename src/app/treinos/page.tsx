@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { useFeedback } from "@/components/FeedbackProvider";
 import { Dumbbell, Plus, Trash2, Clock, X, Loader2, Image as ImageIcon, Upload, FileDown, ArrowUp, ArrowDown, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db, storage } from "@/lib/firebase";
@@ -28,6 +29,7 @@ interface WorkoutSection {
 
 export default function Treinos() {
     const { user } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const [sections, setSections] = useState<WorkoutSection[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -75,6 +77,7 @@ export default function Treinos() {
             await setDoc(docRef, { sections: updatedSections }, { merge: true });
         } catch (error) {
             console.error("Erro ao salvar treinos:", error);
+            showError("Falha ao salvar", "Não foi possível sincronizar o treino.");
         }
     };
 
@@ -170,8 +173,10 @@ export default function Treinos() {
             setImageFile(null);
             setEditingExerciseId(null);
             setIsExerciseModalOpen(false);
+            showSuccess(editingExerciseId ? "Exercício atualizado" : "Exercício adicionado", "O treino foi sincronizado.");
         } catch (error) {
             console.error("Erro ao salvar exercício:", error);
+            showError("Falha ao salvar exercício", "Tente novamente em instantes.");
         } finally {
             setIsUploading(false);
         }
@@ -244,8 +249,10 @@ export default function Treinos() {
                 
                 pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
                 pdf.save(`Protocolo_Treino_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
+                showSuccess("PDF gerado", "O protocolo de treino foi exportado.");
             } catch (error) {
                 console.error("Erro ao gerar PDF:", error);
+                showError("Falha ao gerar PDF", "Não foi possível exportar o treino agora.");
             } finally {
                 setIsGeneratingPdf(false);
             }
@@ -612,7 +619,6 @@ export default function Treinos() {
                         >
                             <X className="w-8 h-8" />
                         </button>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={previewImage}
                             alt="Equipamento"

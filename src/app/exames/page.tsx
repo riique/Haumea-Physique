@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { useFeedback } from "@/components/FeedbackProvider";
 import { DownloadCloud, FileText, Plus, X, Upload, Loader2, Activity, Calendar, User as UserIcon, Edit3, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { collection, addDoc, getDocs, query, orderBy, Timestamp, where, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy, Timestamp, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import { format } from "date-fns";
@@ -87,6 +88,7 @@ const EXAM_CATEGORIES = [
 
 export default function Exames() {
     const { user } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const [exams, setExams] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -181,9 +183,10 @@ export default function Exames() {
 
             await fetchExams();
             closeForm();
+            showSuccess(editingId ? "Exame atualizado" : "Exame salvo", "A avaliação médica foi sincronizada.");
         } catch (error) {
             console.error(error);
-            alert("Falha ao salvar. Verifique o console.");
+            showError("Falha ao salvar", "Não foi possível salvar o exame agora.");
         } finally {
             setSubmitting(false);
         }
@@ -218,9 +221,10 @@ export default function Exames() {
             await deleteDoc(doc(db, `users/${user.uid}/exams`, activeExam.id));
             setActiveExam(null);
             await fetchExams();
+            showSuccess("Exame excluído", "A avaliação médica foi removida do histórico.");
         } catch (error) {
             console.error(error);
-            alert("Falha ao excluir.");
+            showError("Falha ao excluir", "Não foi possível remover este exame agora.");
         } finally {
             setDeleting(false);
             setIsDeleteModalOpen(false);

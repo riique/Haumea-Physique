@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { useFeedback } from "@/components/FeedbackProvider";
 import {
     Syringe,
     Plus,
@@ -54,6 +55,7 @@ const PRESET_FREQUENCIES = [
 
 export default function Protocolos() {
     const { user } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const [loading, setLoading] = useState(true);
     const [protocol, setProtocol] = useState<ProtocolData>({
         currentPhase: "Off",
@@ -102,6 +104,7 @@ export default function Protocolos() {
             await setDoc(docRef, newProtocol, { merge: true });
         } catch (error) {
             console.error("Erro ao salvar protocolo:", error);
+            showError("Falha ao salvar", "Não foi possível sincronizar o protocolo.");
         }
     };
 
@@ -109,6 +112,7 @@ export default function Protocolos() {
         const updated = { ...protocol, currentPhase: phase, lastUpdated: new Date().toISOString() };
         setProtocol(updated);
         saveProtocol(updated);
+        showSuccess("Fase atualizada", `Protocolo definido como ${phase}.`);
     };
 
     const handleAddItem = () => {
@@ -134,6 +138,7 @@ export default function Protocolos() {
         saveProtocol(updated);
         setIsModalOpen(false);
         setNewItem({ type: "ergogenic", substanceName: "", ester: "", dosageMg: 0, frequency: PRESET_FREQUENCIES[0], route: "injetavel" });
+        showSuccess("Composto registrado", "O protocolo foi atualizado.");
     };
 
     const handleRemoveItem = (id: string) => {
@@ -141,6 +146,7 @@ export default function Protocolos() {
         const updated = { ...protocol, items: updatedItems, lastUpdated: new Date().toISOString() };
         setProtocol(updated);
         saveProtocol(updated);
+        showSuccess("Composto removido", "O protocolo foi atualizado.");
     };
 
     const ergogenics = protocol.items.filter(i => i.type === "ergogenic");

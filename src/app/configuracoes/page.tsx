@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { useFeedback } from "@/components/FeedbackProvider";
 import { User, LogOut, Loader2, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { auth, db, storage } from "@/lib/firebase";
@@ -11,6 +12,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function Configuracoes() {
     const { user, userData, setUserData } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [loading, setLoading] = useState(false);
@@ -74,9 +76,11 @@ export default function Configuracoes() {
 
             await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
             setUserData(updatedData);
+            showSuccess("Perfil salvo", "Suas informações foram atualizadas.");
 
         } catch (error) {
             console.error("Erro ao salvar perfil:", error);
+            showError("Falha ao salvar", "Não foi possível atualizar o perfil agora.");
         } finally {
             setLoading(false);
         }
@@ -119,7 +123,6 @@ export default function Configuracoes() {
                                 >
                                     <div className="w-full h-full rounded-full bg-[#e6e2d6] flex flex-col items-center justify-center overflow-hidden">
                                         {previewUrl ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
                                             <img src={previewUrl} alt="Avatar" className="w-full h-full object-cover" />
                                         ) : (
                                             <User className="text-[#a19e95] w-8 h-8 opacity-50 block" />
