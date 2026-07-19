@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { useFeedback } from "@/components/FeedbackProvider";
 import { Plus, X, Loader2, Activity, FileText, UploadCloud, DownloadCloud, Scale, TrendingDown, TrendingUp, Minus, Trash2, Pencil, Code, Copy, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db, storage } from "@/lib/firebase";
@@ -45,6 +46,7 @@ interface BioimpedanceEntry {
 
 export default function Bioimpedancia() {
     const { user } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const [records, setRecords] = useState<BioimpedanceEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
@@ -162,8 +164,8 @@ Formato esperado:
             
             setJsonModalOpen(false);
             setJsonInput("");
-        } catch (error) {
-            alert("JSON inválido. Certifique-se de colar apenas o formato JSON.");
+        } catch {
+            showError("JSON inválido", "Cole apenas um JSON válido para preencher o registro.");
         }
     };
 
@@ -271,8 +273,10 @@ Formato esperado:
             setDeleteModalOpen(false);
             setRecordToDelete(null);
             fetchRecords();
+            showSuccess("Registro excluído", "A bioimpedância foi removida do histórico.");
         } catch (error) {
             console.error("Erro ao deletar registro:", error);
+            showError("Falha ao excluir", "Não foi possível remover este registro agora.");
         }
     };
 
@@ -317,9 +321,11 @@ Formato esperado:
 
             setIsAdding(false);
             fetchRecords();
+            showSuccess(editingId ? "Registro atualizado" : "Registro salvo", "Os dados de bioimpedância foram sincronizados.");
 
         } catch (error) {
             console.error("Erro ao salvar registro:", error);
+            showError("Falha ao salvar", "Não foi possível salvar a bioimpedância agora.");
         } finally {
             setSubmitting(false);
         }

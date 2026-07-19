@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { useFeedback } from "@/components/FeedbackProvider";
 import { Utensils, Flame, Plus, Trash2, X, CheckCircle2, Circle, Loader2, FileJson, ShoppingCart, FileDown, Pill, Edit2, Save, ArrowUpDown } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -47,6 +48,7 @@ interface QuantityAdjustmentModalState {
 
 export default function Dieta() {
     const { user } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const [meals, setMeals] = useState<Meal[]>([]);
     const [supplements, setSupplements] = useState<Supplement[]>([]);
     const [loading, setLoading] = useState(true);
@@ -355,12 +357,12 @@ export default function Dieta() {
         const extracted = extractQuantityNumber(food.quantity);
 
         if (!food.quantity || !extracted) {
-            alert("Nao foi possivel identificar uma quantidade numerica para este alimento.");
+            showError("Quantidade não identificada", "Não foi possível encontrar um valor numérico nesse alimento.");
             return;
         }
 
         if (extracted.value <= 0) {
-            alert("A quantidade original precisa ser maior que zero para recalcular proporcionalmente.");
+            showError("Quantidade inválida", "A quantidade original precisa ser maior que zero para recalcular proporcionalmente.");
             return;
         }
 
@@ -385,7 +387,7 @@ export default function Dieta() {
 
         const parsedNewAmount = parseNumericValue(quantityAdjustment.newAmount);
         if (!Number.isFinite(parsedNewAmount) || parsedNewAmount <= 0) {
-            alert("Informe uma nova quantidade valida.");
+            showError("Quantidade inválida", "Informe uma nova quantidade válida.");
             return;
         }
 
@@ -412,6 +414,7 @@ export default function Dieta() {
 
         setMeals(updatedMeals);
         saveDietToFirebase(updatedMeals);
+        showSuccess("Quantidade ajustada", "Macros e calorias foram recalculados proporcionalmente.");
         closeQuantityAdjustModal();
     };
 
@@ -419,7 +422,7 @@ export default function Dieta() {
         try {
             const parsed = JSON.parse(jsonInput);
             if (!Array.isArray(parsed)) {
-                alert("O JSON deve ser um array de refeições.");
+                showError("JSON incompatível", "O conteúdo precisa ser um array de refeições.");
                 return;
             }
 
@@ -448,16 +451,17 @@ export default function Dieta() {
             setJsonInput("");
             setIsJsonModalOpen(false);
             if (importedMeals.length > 0) setActiveMealId(importedMeals[0].id);
+            showSuccess("Dieta importada", `${importedMeals.length} refeição(ões) carregada(s) no plano.`);
 
         } catch (error) {
-            alert("JSON inválido. Verifique a sintaxe.");
+            showError("JSON inválido", "Verifique a sintaxe e tente novamente.");
             console.error(error);
         }
     };
 
     const generatePDF = async () => {
         if (selectedPdfMealIds.length === 0 && (!includeSupplementsInPdf || supplements.length === 0)) {
-            alert("Selecione pelo menos uma refeicao ou inclua a suplementacao no PDF.");
+            showError("Nada selecionado", "Selecione pelo menos uma refeição ou inclua a suplementação no PDF.");
             return;
         }
 
@@ -493,9 +497,10 @@ export default function Dieta() {
 
             pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
             pdf.save(`Plano_Alimentar_Haumea_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
+            showSuccess("PDF gerado", "O plano alimentar foi exportado com sucesso.");
         } catch (error) {
             console.error("Erro ao gerar PDF:", error);
-            alert("Não foi possível gerar o PDF da dieta.");
+            showError("Falha ao gerar PDF", "Não foi possível exportar a dieta agora.");
         } finally {
             const element = document.getElementById("pdf-content");
             if (element) {

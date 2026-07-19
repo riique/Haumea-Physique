@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { FeedbackProvider } from "@/components/FeedbackProvider";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -49,7 +50,9 @@ function ContentWrapper({ children }: { children: React.ReactNode }) {
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     return (
         <AuthProvider>
-            <ContentWrapper>{children}</ContentWrapper>
+            <FeedbackProvider>
+                <ContentWrapper>{children}</ContentWrapper>
+            </FeedbackProvider>
         </AuthProvider>
     );
 }

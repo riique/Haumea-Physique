@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type DragEvent } from "react";
 import { Header } from "@/components/Header";
+import { useFeedback } from "@/components/FeedbackProvider";
 import {
     Pill,
     Plus,
@@ -31,6 +32,7 @@ interface Supplement {
 
 export default function Suplementos() {
     const { user } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const [supplements, setSupplements] = useState<Supplement[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSupplementModalOpen, setIsSupplementModalOpen] = useState(false);
@@ -86,6 +88,7 @@ export default function Suplementos() {
             await setDoc(docRef, { items: updated, lastResetDate: today }, { merge: true });
         } catch (error) {
             console.error("Erro ao salvar suplementos:", error);
+            showError("Falha ao salvar", "Não foi possível sincronizar os suplementos.");
         }
     };
 
@@ -135,6 +138,7 @@ export default function Suplementos() {
 
         setSupplements(updated);
         saveToFirebase(updated);
+        showSuccess(editingSupplementId ? "Suplemento atualizado" : "Suplemento adicionado", "O protocolo diário foi sincronizado.");
         closeSupplementModal();
     };
 

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
+import { PhotoCompare } from "@/components/PhotoCompare";
+import { useFeedback } from "@/components/FeedbackProvider";
 import { Camera, Image as ImageIcon, Plus, X, UploadCloud, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db, storage } from "@/lib/firebase";
@@ -48,6 +50,7 @@ interface EvolutionEntry {
 
 export default function Evolucao() {
     const { user } = useAuth();
+    const { showError, showSuccess } = useFeedback();
     const [evolutions, setEvolutions] = useState<EvolutionEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
@@ -222,9 +225,11 @@ export default function Evolucao() {
 
             setIsAdding(false);
             fetchEvolutions();
+            showSuccess("Evolução salva", "O registro visual e as medidas foram adicionados.");
 
         } catch (error) {
             console.error("Erro ao salvar evolução:", error);
+            showError("Falha ao salvar", "Não foi possível salvar a evolução agora.");
         } finally {
             setSubmitting(false);
         }
@@ -555,6 +560,12 @@ export default function Evolucao() {
                 </div>
             )}
 
+            {!isAdding && evolutions.length > 0 && (
+                <div className="mb-12 md:mb-16">
+                    <PhotoCompare entries={evolutions} />
+                </div>
+            )}
+
             {/* Linha do Tempo */}
             <div className="space-y-12">
                 {evolutions.length === 0 && !isAdding && (
@@ -569,7 +580,6 @@ export default function Evolucao() {
                 {evolutions.map((evo) => {
                     const hasDefaultPhotos = defaultPhotosMap.some(p => evo.photos[p.key as keyof typeof evo.photos]) || (evo.photos.extra && evo.photos.extra.length > 0);
                     const hasPosePhotos = posePhotosMap.some(p => evo.photos[p.key as keyof typeof evo.photos]) || (evo.photos.extraPoses && evo.photos.extraPoses.length > 0);
-                    const hasPhotos = hasDefaultPhotos || hasPosePhotos;
                     const hasMeasures = Object.values(evo.measures || {}).some(v => v !== "");
 
                     return (
